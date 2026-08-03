@@ -1,0 +1,14 @@
+[
+  {
+    "id": "e4885438-0109-4814-8325-7fa08a270991",
+    "email": "file-api-1779193878462@example.com",
+    "password": {
+      "salt": "11f9fcabe6f6d3eb489ab92c8a31b5e0",
+      "iterations": 100000,
+      "keyLength": 32,
+      "digest": "sha256",
+      "hash": "1224769f60d36c042f161f98703eb690142dea7f0278ceb6bac1f2a8a7974da6"
+    },
+    "createdAt": "2026-05-19T12:31:18.489Z"
+  }
+]

@@ -1,0 +1,13 @@
+Pure Node streaming download fixture.
+
+This file exists so Module 06 can demonstrate streaming a file without
+loading the entire file into memory.
+
+Key ideas:
+- fs.createReadStream sends chunks.
+- res is a writable stream.
+- pipe connects readable output to writable input.
+- Range requests let clients resume downloads.
+- 206 Partial Content means the server sent only part of the file.
+
+End of fixture.
