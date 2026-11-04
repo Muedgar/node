@@ -1,123 +1,94 @@
-function splitPath(pathname) {
-  return pathname.split("/").filter(Boolean);
-}
-
-function compilePath(pathPattern) {
-  return splitPath(pathPattern).map((segment) => {
-    if (segment.startsWith(":")) {
-      return {
-        type: "param",
-        name: segment.slice(1),
-      };
-    }
-
-    return {
-      type: "static",
-      value: segment,
-    };
-  });
-}
-
-function decodeParam(value, paramName) {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    const err = new Error(`Invalid URL encoding for param "${paramName}"`);
-    err.statusCode = 400;
-    throw err;
-  }
-}
-
-function matchSegments(routeSegments, requestSegments) {
-  if (routeSegments.length !== requestSegments.length) return null;
-
-  const params = {};
-  let score = 0;
-
-  for (let i = 0; i < routeSegments.length; i++) {
-    const routeSegment = routeSegments[i];
-    const requestSegment = requestSegments[i];
-
-    if (routeSegment.type === "static") {
-      if (routeSegment.value !== requestSegment) return null;
-      score += 10;
-      continue;
-    }
-
-    params[routeSegment.name] = decodeParam(requestSegment, routeSegment.name);
-    score += 1;
-  }
-
-  return { params, score };
-}
 
 function createRouter() {
   const routes = [];
+
+  function splitPath(path) {
+    return path.split("/").filter(Boolean);
+  }
 
   function add(method, path, handler) {
     routes.push({
       method: method.toUpperCase(),
       path,
-      segments: compilePath(path),
       handler,
-      order: routes.length,
+      segments: splitPath(path),
     });
   }
 
-  function register(method) {
-    return (path, handler) => add(method, path, handler);
-  }
-
   function match(method, pathname) {
-    const normalizedMethod = method.toUpperCase();
     const requestSegments = splitPath(pathname);
     const pathMatches = [];
 
     for (const route of routes) {
-      const matched = matchSegments(route.segments, requestSegments);
-      if (!matched) continue;
+      if (route.segments.length !== requestSegments.length) {
+        continue;
+      }
 
-      pathMatches.push({
-        route,
-        params: matched.params,
-        score: matched.score,
-      });
+      const params = {};
+      let score = 0;
+      let valid = true;
+
+      for (let i = 0; i < route.segments.length; i++) {
+        const expected = route.segments[i];
+        const actual = requestSegments[i];
+
+        if (expected.startsWith(":")) {
+          try {
+            params[expected.slice(1)] = decodeURIComponent(actual);
+          } catch {
+            const error = new Error(
+              `Invalid URL encoding for param "${expected.slice(1)}"`
+            );
+            error.statusCode = 400;
+            throw error;
+          }
+
+          score += 1;
+        } else if (expected === actual) {
+          score += 10;
+        } else {
+          valid = false;
+          break;
+        }
+      }
+
+      if (valid) {
+        pathMatches.push({ route, params, score });
+      }
     }
 
     const methodMatches = pathMatches
-      .filter((match) => match.route.method === normalizedMethod)
-      .sort((a, b) => b.score - a.score || a.route.order - b.route.order);
+      .filter((item) => item.route.method === method.toUpperCase())
+      .sort((a, b) => b.score - a.score);
 
-    if (methodMatches.length > 0) {
-      const best = methodMatches[0];
+    if (methodMatches.length) {
+      const { route, params } = methodMatches[0];
+
       return {
         type: "match",
-        handler: best.route.handler,
-        params: best.params,
+        handler: route.handler,
+        params,
         route: {
-          method: best.route.method,
-          path: best.route.path,
+          method: route.method,
+          path: route.path,
         },
       };
     }
 
-    if (pathMatches.length > 0) {
+    if (pathMatches.length) {
       return {
         type: "method-not-allowed",
-        allowedMethods: [...new Set(pathMatches.map((match) => match.route.method))].sort(),
+        allowedMethods: [
+          ...new Set(pathMatches.map((item) => item.route.method)),
+        ].sort(),
       };
     }
 
-    return {
-      type: "not-found",
-    };
+    return { type: "not-found" };
   }
 
-  function listRoutes() {
-    return routes.map((route) => ({
-      method: route.method,
-      path: route.path,
-    }));
+  function register(method) {
+    return (path, handler) => add(method, path, handler);
   }
 
   return {
@@ -128,7 +99,8 @@ function createRouter() {
     patch: register("PATCH"),
     delete: register("DELETE"),
     match,
-    listRoutes,
+    listRoutes: () =>
+      routes.map(({ method, path }) => ({ method, path })),
   };
 }
 
