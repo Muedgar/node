@@ -10,7 +10,9 @@ function compose(middlewares) {
         // Basic error handler: end request
         res.statusCode = 500;
         res.setHeader("Content-Type", "application/json; charset=utf-8");
-        res.end(JSON.stringify({ error: "Middleware error", detail: String(err) }));
+        res.end(
+          JSON.stringify({ error: "Middleware error", detail: String(err) })
+        );
         return;
       }
 

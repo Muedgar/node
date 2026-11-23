@@ -1,41 +1,17 @@
-// app/router.js
+// Keep the original combined demo's { handler, params } | null contract.
+const {
+  createMatcher,
+} = require("../../modules/router/routes-fundamentals/01-matcher");
 function createRouter() {
-  const routes = []; // { method, path, parts, handler }
-
-  function add(method, path, handler) {
-    const parts = path.split("/").filter(Boolean);
-    routes.push({ method, path, parts, handler });
-  }
-
-  function match(method, pathname) {
-    const pathParts = pathname.split("/").filter(Boolean);
-
-    for (const r of routes) {
-      if (r.method !== method) continue;
-      if (r.parts.length !== pathParts.length) continue;
-
-      const params = {};
-      let ok = true;
-
-      for (let i = 0; i < r.parts.length; i++) {
-        const rp = r.parts[i];
-        const pp = pathParts[i];
-
-        if (rp.startsWith(":")) {
-          params[rp.slice(1)] = decodeURIComponent(pp);
-        } else if (rp !== pp) {
-          ok = false;
-          break;
-        }
-      }
-
-      if (ok) return { handler: r.handler, params };
-    }
-
-    return null;
-  }
-
-  return { add, match };
+  const matcher = createMatcher();
+  return {
+    add: matcher.add,
+    match(method, pathname) {
+      const result = matcher.match(method, pathname);
+      return result.type === "match"
+        ? { handler: result.handler, params: result.params }
+        : null;
+    },
+  };
 }
-
 module.exports = { createRouter };

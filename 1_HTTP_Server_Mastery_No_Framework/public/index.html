@@ -23,7 +23,7 @@
         const r = await fetch("/api/hello", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ msg: "Hello from browser" })
+          body: JSON.stringify({ msg: "Hello from browser" }),
         });
         alert(JSON.stringify(await r.json(), null, 2));
       };

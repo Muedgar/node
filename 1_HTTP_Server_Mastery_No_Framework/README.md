@@ -1,50 +1,28 @@
 # Pure Node.js HTTP Server Mastery
 
-This repo is organized as a learning path for mastering Node.js HTTP servers without Express, Fastify, Koa, Multer, Busboy, or WebSocket helper libraries.
+Three broad modules, built without Express or other web frameworks:
 
-## How To Use This Repo
+| Module                                 | Focus                                                                    | Start                       |
+| -------------------------------------- | ------------------------------------------------------------------------ | --------------------------- |
+| [Router](modules/router/README.md)     | Ten request/routing fundamentals reused in five file-backed MVC projects | `npm run router:todo`       |
+| [Sockets](modules/sockets/README.md)   | Internal events, server-sent events and WebSocket                        | `npm run sockets:websocket` |
+| [Security](modules/security/README.md) | Authentication, request hardening and a secured file API                 | `npm run security:auth`     |
 
-Each module is self-contained and has:
+## Router learning path
 
-- `README.md` for the concept, learning goal, hard example, and test commands.
-- `server.js` as the module entry point.
-- `challenge.js` for the harder exercise or client-side stress/demo script.
-
-Run the original combined server:
-
-```sh
-npm start
-```
-
-Run a specific module:
+Read [routes-fundamentals](modules/router/routes-fundamentals/README.md) once, then practice Todo, Notes, Reading List, Room Booking and Food Store. JSON bodies, query strings, HTML forms and multipart uploads are request fundamentals rather than separate top-level modules.
 
 ```sh
-npm run module:01
-```
-
-Check JavaScript syntax:
-
-```sh
+npm run router:todo
+npm run router:todo:test
+npm run router:test
 npm run check
 ```
 
-## Module Path
+Projects use only Node core modules (Node.js 20+). State is saved to local JSON files; tests isolate their data in temporary folders. File stores serialize updates within one process, so run one process per project data file.
 
-1. HTTP server from scratch
-2. Routing system from scratch
-3. JSON body parser
-4. Query params + URL params
-5. File upload parser
-6. File streaming download
-7. Static file server
-8. Auth system
-9. EventEmitter-based internal events
-10. Server-Sent Events
-11. WebSocket basics
-12. Build full File Management API
-13. Add live upload/progress notifications
-14. Add logs, errors, rate limits, security
+## Existing examples
 
-## Shared Code
+The original combined demo remains available with `npm start`. Original lessons are grouped under Router/reference, Sockets and Security. Existing module:01 through module:14 aliases still run the moved examples. Their numeric IDs are historical lesson names, not fourteen top-level modules.
 
-Reusable building blocks live in `shared/`. Modules can use shared code only after the module has taught the underlying idea from first principles.
+shared/ contains compatibility helpers for the original combined demo; the five new router projects import routes-fundamentals directly.

@@ -1,5 +1,8 @@
 // app/createApp.js
 const { createRouter } = require("../router/router");
+const {
+  parseQuery,
+} = require("../../modules/router/routes-fundamentals/02-query-parser");
 const { compose } = require("./middleware");
 
 function createApp() {
@@ -18,9 +21,12 @@ function createApp() {
     },
     handle(req, res) {
       // Parse URL + query using WHATWG URL
-      const fullUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+      const fullUrl = new URL(
+        req.url,
+        `http://${req.headers.host || "localhost"}`
+      );
       req.path = fullUrl.pathname;
-      req.query = Object.fromEntries(fullUrl.searchParams.entries());
+      req.query = parseQuery(fullUrl.searchParams);
 
       // Route middleware at the end: only runs if previous middleware calls next()
       const routeMiddleware = (req, res, next) => {

@@ -60,7 +60,10 @@ function sendDownload(res, filePath, downloadName) {
 
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/octet-stream");
-    res.setHeader("Content-Disposition", `attachment; filename="${downloadName}"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${downloadName}"`
+    );
     res.setHeader("Content-Length", String(st.size));
 
     fs.createReadStream(filePath).pipe(res);

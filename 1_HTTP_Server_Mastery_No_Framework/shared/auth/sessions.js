@@ -19,7 +19,10 @@ function sessionMiddleware({ cookieName = "sid" } = {}) {
 
       // Set cookie
       // HttpOnly prevents JS access in browser
-      res.setHeader("Set-Cookie", `${cookieName}=${encodeURIComponent(sessionId)}; HttpOnly; Path=/`);
+      res.setHeader(
+        "Set-Cookie",
+        `${cookieName}=${encodeURIComponent(sessionId)}; HttpOnly; Path=/`
+      );
     }
 
     req.sessionId = sessionId;
